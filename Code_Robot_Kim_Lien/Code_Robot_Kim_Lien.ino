@@ -136,29 +136,29 @@ void DCdes(bool &pressed){
   {
     Serial.print("Circle just pressed: \n");
     pressed = true;
-    pwm.setPWM(12,0,3900);
-    pwm.setPWM(13,0,0);
-    pwm.setPWM(14,0,0);
-    pwm.setPWM(15,0,0);
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
+    pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
   }
   if (ps2x.Button(PSB_GREEN)) //Ball-take-in
   {
     Serial.print("Triangle pressed \n");
     pressed = true;
-    pwm.setPWM(12,0,0);
-    pwm.setPWM(13,0,0);
-    pwm.setPWM(14,0,4095);
-    pwm.setPWM(15,0,0);
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_7_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
   }
 
   if (ps2x.Button(PSB_PINK)) //Ball-take-in Reverse
   {
     Serial.print("Triangle pressed \n");
     pressed = true;
-    pwm.setPWM(12,0,0);
-    pwm.setPWM(13,0,0);
-    pwm.setPWM(14,0,0);
-    pwm.setPWM(15,0,4095);
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_8_PIN,0,4095);
   }
 }
 
