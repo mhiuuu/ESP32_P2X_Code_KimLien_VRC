@@ -30,22 +30,19 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 PS2X ps2x; // khởi tạo class PS2x
 bool pressed;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   Serial.print("Ket noi voi tay cam PS2:");
 
   int error = -1;
-  for (int i = 0; i < 10; i++) // thử kết nối với tay cầm ps2 trong 10 lần
-  {
+  for (int i = 0; i < 10; i++) { // thử kết nối với tay cầm ps2 trong 10 lần
     delay(1000); // đợi 1 giây
     // cài đặt chân và các chế độ: GamePad(clock, command, attention, data, Pressures?, Rumble?) check for error
     error = ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, pressures, rumble);
     Serial.print(".");
   }
 
-  switch (error) // kiểm tra lỗi nếu sau 10 lần không kết nối được
-  {
+  switch (error) {// kiểm tra lỗi nếu sau 10 lần không kết nối được
   case 0:
     Serial.println(" Ket noi tay cam PS2 thanh cong");
     break;
@@ -66,11 +63,6 @@ void setup()
   Wire.setClock(400000);
 
 }
-int i = 8;
-
-// Biến nhớ
-int shooter_state = 0; // Bắn bóng
-int holder_state = 0; // Hút bóng
 
 // DC for movement PIN
 #define DC_MOVEMENT_1_PIN 8
@@ -84,105 +76,109 @@ int holder_state = 0; // Hút bóng
 #define DC_MOVEMENT_7_PIN 14
 #define DC_MOVEMENT_8_PIN 15
 
-void loop()
-{
-  ps2x.read_gamepad(pressed,0); // gọi hàm để đọc tay điều khiển
+void loop() {
+  ps2x.read_gamepad(pressed,0); // call the function to read datas from the ps2 console
   pressed = false;
 
-  // các trả về giá trị TRUE (1) khi nút được giữ
-  if (ps2x.Button(PSB_START)) // nếu nút Start được giữ, in ra Serial monitor
+  //return value TRUE(1) when buttons are held
+  if (ps2x.Button(PSB_START)) //if "Start" button is being held, log messeage to Serial monitor
     Serial.println("Start is being held");
-  if (ps2x.Button(PSB_SELECT)) // nếu nút Select được giữ, in ra Serial monitor
+  if (ps2x.Button(PSB_SELECT)) //if "Select" button is being held, log messeage to Serial monitor
     Serial.println("Select is being held");
-
-  DCdes(pressed);
+  int shooting = 0, intake = 0;
+  DCdes(pressed, shooting, intake);
   if(!pressed) resetMotors();
   delay(30);
 }
-void DCdes(bool &pressed){
-  if (ps2x.Button(PSB_PAD_UP)) // Tiến
-  {
+void DCdes(bool &pressed, int &shooting, int &intake) {
+  /******************************************************
+  * Code to controll the DCs which is used for running and turning
+  ********************************************************/
+  if (ps2x.Button(PSB_PAD_UP)) { //Up
+    Serial.println("Going up");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4095);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,4095);
-    pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
+    pwm.setPWM(8,0,4095);
+    pwm.setPWM(9,0,0);
+    pwm.setPWM(10,0,0);
+    pwm.setPWM(11,0,4095);
   }
-  if (ps2x.Button(PSB_PAD_RIGHT)) // Rẽ Phải
-  {
-    Serial.print("Right held this hard: \n");
+  if (ps2x.Button(PSB_PAD_RIGHT)) { //Turn right
+    Serial.println("Turning right");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4000);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
+    pwm.setPWM(8,0,2000);
+    pwm.setPWM(9,0,0);
+    pwm.setPWM(10,0,0);
+    pwm.setPWM(11,0,0);
   }
-  if (ps2x.Button(PSB_PAD_LEFT)) // Rẽ Trái
-  {
-    Serial.print("LEFT held this hard: \n");
+  if (ps2x.Button(PSB_PAD_LEFT)) { //Turn left
+    Serial.println("Turning left");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,4000);
-    pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
+    pwm.setPWM(8,0,0);
+    pwm.setPWM(9,0,0);
+    pwm.setPWM(10,0,0);
+    pwm.setPWM(11,0,2000);
   }
-  if (ps2x.Button(PSB_PAD_DOWN)) //Lùi
-  {
-    Serial.print("DOWN held this hard: \n");
+  if (ps2x.Button(PSB_PAD_DOWN)) { //Down
+    Serial.println("Going down");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4095);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_4_PIN,0,4095);
+    pwm.setPWM(8,0,0);
+    pwm.setPWM(9,0,3000);
+    pwm.setPWM(10,0,3000);
+    pwm.setPWM(11,0,0);
   }
 
-  if (ps2x.Button(PSB_RED)) //Shooter
-  {
-    Serial.print("Circle just pressed: \n");
+
+  /*****************************************************
+  * This section is for ball intake system and shooting system!
+  ******************************************************/
+  if(ps2x.ButtonReleased(PSB_RED)) {
+    //If the human player press the O button and release it and the intake system hasn't working
+    //The state of intake will be change and the board will know that it has to start auto intake
+    //The same logic works when the intake system is working and human player press O
+    if(intake == 0) intake = 1;
+    else intake = 0; Serial.println("Abort auto intake");
+
+    //If the human player want to start intake system only when they hold O, this will work 
+    //However this lead us to another problem, if the human player want to change the state to auto, the intake system will run for a sec!!! Focusing on fixing it
+  } else if(ps2x.Button(PSB_RED)) {
+    Serial.println("Manual intake");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
   }
-  else if ( ps2x.ButtonPressed(PSB_L1)){ // Giữ bắn bóng chạy liên tục chỉ = ấn 1 lần
-      if(shooter_state == 0){
-        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
-        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
-        shooter_state += 1;
-        delay(100);
-      } else {
-        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
-        shooter_state = 0;
-      }
-  }
-  if (ps2x.Button(PSB_GREEN)) //Ball-take-in
-  {
-    Serial.print("Triangle pressed \n");
+  if(intake == 1) {
+    Serial.println("Intake auto");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,4095);
     pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_7_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
   }
 
-  if (ps2x.Button(PSB_PINK)) //Ball-take-in Reverse
-  {
-    Serial.print("Triangle pressed \n");
+  if(ps2x.ButtonReleased(PSB_PINK)) {
+    if(shooting == 0) shooting = 1;
+    else shooting = 0; Serial.println("Abort auto shooting");
+  } else if (ps2x.Button(PSB_PINK)) { //Shooting
+    Serial.println("Shooting manualy");
     pressed = true;
     pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_8_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_8_PIN,0,3900);
+  }
+  if(shooting == 1) {
+    Serial.println("Auto shooting");
+    pressed = true;
+    pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_8_PIN,0,3900);
   }
 }
 
-void resetMotors(){
+void resetMotors() {
   pwm.setPWM(8,0,0);
   pwm.setPWM(9,0,0);
   pwm.setPWM(10,0,0);
