@@ -68,6 +68,10 @@ void setup()
 }
 int i = 8;
 
+// Biến nhớ
+int shooter_state = 0; // Bắn bóng
+int holder_state = 0; // Hút bóng
+
 // DC for movement PIN
 #define DC_MOVEMENT_1_PIN 8
 #define DC_MOVEMENT_2_PIN 9
@@ -140,6 +144,22 @@ void DCdes(bool &pressed){
     pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
+  }
+  else if ( ps2x.ButtonPressed(PSB_L1)){ // Giữ bắn bóng chạy liên tục chỉ = ấn 1 lần
+      if(shooter_state == 0){
+        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+        pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
+        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
+        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
+        shooter_state += 1;
+        delay(100);
+      } else {
+        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
+        pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
+        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
+        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
+        shooter_state = 0;
+      }
   }
   if (ps2x.Button(PSB_GREEN)) //Ball-take-in
   {
