@@ -62,7 +62,7 @@ void setup()
   Wire.begin();
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
-  pwm.setPWMFreq(1600);
+  pwm.setPWMFreq(50);
   Wire.setClock(400000);
 
 }
@@ -71,6 +71,10 @@ int i = 8;
 // Biến nhớ
 int shooter_state = 0; // Bắn bóng
 int holder_state = 0; // Hút bóng
+bool ban = false;
+
+#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
+#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
 
 // DC for movement PIN
 #define DC_MOVEMENT_1_PIN 8
@@ -83,6 +87,12 @@ int holder_state = 0; // Hút bóng
 #define DC_MOVEMENT_6_PIN 13
 #define DC_MOVEMENT_7_PIN 14
 #define DC_MOVEMENT_8_PIN 15
+
+// Servo 
+#define SERVO_1_PIN 5 // 360
+#define SERVO_2_PIN 4 // 360
+#define SERVO_3_PIN 3 // pusher
+#define SERVO_4_PIN 6 // holder
 
 void loop()
 {
@@ -103,8 +113,8 @@ void DCdes(bool &pressed){
   if (ps2x.Button(PSB_PAD_UP)) // Tiến
   {
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4095);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4095);
     pwm.setPWM(DC_MOVEMENT_3_PIN,0,4095);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
   }
@@ -112,8 +122,8 @@ void DCdes(bool &pressed){
   {
     Serial.print("Right held this hard: \n");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4000);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4000);
     pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
   }
@@ -130,8 +140,8 @@ void DCdes(bool &pressed){
   {
     Serial.print("DOWN held this hard: \n");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,4095);
   }
@@ -141,14 +151,14 @@ void DCdes(bool &pressed){
     Serial.print("Circle just pressed: \n");
     pressed = true;
     pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
+    pwm.setPWM(DC_MOVEMENT_6_PIN,0,3700);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
   }
   else if ( ps2x.ButtonPressed(PSB_L1)){ // Giữ bắn bóng chạy liên tục chỉ = ấn 1 lần
       if(shooter_state == 0){
         pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_6_PIN,0,3900);
+        pwm.setPWM(DC_MOVEMENT_6_PIN,0,3700);
         pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
         pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
         shooter_state += 1;
@@ -179,6 +189,17 @@ void DCdes(bool &pressed){
     pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,4095);
+  }
+
+  if (ps2x.ButtonPressed(PSB_R1)) // Servo inside
+  {
+    pwm.writeMicroseconds(SERVO_1_PIN, 1500);
+    delay(10);
+  }
+  if (ps2x.ButtonPressed(PSB_R2)) // Servo inside
+  {
+    pwm.writeMicroseconds(SERVO_1_PIN, 700);
+    delay(10);
   }
 }
 
