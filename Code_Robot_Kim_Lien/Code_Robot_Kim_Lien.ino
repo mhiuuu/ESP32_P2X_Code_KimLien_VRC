@@ -114,8 +114,8 @@ void DCdes(bool &pressed){
   {
     pressed = true;
     pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4095);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,2600);
+    pwm.setPWM(DC_MOVEMENT_3_PIN,0,2600);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
   }
   if (ps2x.Button(PSB_PAD_RIGHT)) // Rẽ Phải
@@ -123,8 +123,8 @@ void DCdes(bool &pressed){
     Serial.print("Right held this hard: \n");
     pressed = true;
     pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,4000);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
+    pwm.setPWM(DC_MOVEMENT_3_PIN,0,3500);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
   }
   if (ps2x.Button(PSB_PAD_LEFT)) // Rẽ Trái
@@ -132,18 +132,18 @@ void DCdes(bool &pressed){
     Serial.print("LEFT held this hard: \n");
     pressed = true;
     pwm.setPWM(DC_MOVEMENT_1_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_3_PIN,0,4000);
+    pwm.setPWM(DC_MOVEMENT_2_PIN,0,3500);
+    pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_4_PIN,0,0);
   }
   if (ps2x.Button(PSB_PAD_DOWN)) //Lùi
   {
     Serial.print("DOWN held this hard: \n");
     pressed = true;
-    pwm.setPWM(DC_MOVEMENT_1_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_1_PIN,0,2300);
     pwm.setPWM(DC_MOVEMENT_2_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_3_PIN,0,0);
-    pwm.setPWM(DC_MOVEMENT_4_PIN,0,4095);
+    pwm.setPWM(DC_MOVEMENT_4_PIN,0,2300);
   }
 
   if (ps2x.Button(PSB_RED)) //Shooter
@@ -154,22 +154,6 @@ void DCdes(bool &pressed){
     pwm.setPWM(DC_MOVEMENT_6_PIN,0,3700);
     pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
     pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
-  }
-  else if ( ps2x.ButtonPressed(PSB_L1)){ // Giữ bắn bóng chạy liên tục chỉ = ấn 1 lần
-      if(shooter_state == 0){
-        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_6_PIN,0,3700);
-        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
-        shooter_state += 1;
-        delay(100);
-      } else {
-        pwm.setPWM(DC_MOVEMENT_5_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_6_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_7_PIN,0,0);
-        pwm.setPWM(DC_MOVEMENT_8_PIN,0,0);
-        shooter_state = 0;
-      }
   }
   if (ps2x.Button(PSB_GREEN)) //Ball-take-in
   {
@@ -198,7 +182,7 @@ void DCdes(bool &pressed){
   }
   if (ps2x.ButtonPressed(PSB_R2)) // Servo inside
   {
-    pwm.writeMicroseconds(SERVO_1_PIN, 700);
+    pwm.writeMicroseconds(SERVO_1_PIN, 2300);
     delay(10);
   }
 }
